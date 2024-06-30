@@ -1,6 +1,5 @@
 ﻿using E_Smart.Areas.Admin.Models;
 using E_Smart.Areas.Admin.Repository;
-using E_Smart.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Smart.Areas.Admin.Controllers

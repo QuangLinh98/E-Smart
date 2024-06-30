@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace E_Smart.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20240629142812_FirstData")]
-    partial class FirstData
+    [Migration("20240630094217_UpdateCustomerTB")]
+    partial class UpdateCustomerTB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,8 +62,14 @@ namespace E_Smart.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Customer_phone")
-                        .HasColumnType("int");
+                    b.Property<string>("Customer_name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Customer_phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("CustomerId");
 
@@ -112,9 +118,6 @@ namespace E_Smart.Migrations
                     b.Property<int>("Order_Id")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Product_Id")
                         .HasColumnType("int");
 
@@ -128,7 +131,7 @@ namespace E_Smart.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("Product_Id");
 
                     b.ToTable("OrderDetails");
                 });
@@ -186,7 +189,9 @@ namespace E_Smart.Migrations
 
                     b.HasOne("E_Smart.Areas.Admin.Models.Product", "Product")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("ProductId");
+                        .HasForeignKey("Product_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Order");
 

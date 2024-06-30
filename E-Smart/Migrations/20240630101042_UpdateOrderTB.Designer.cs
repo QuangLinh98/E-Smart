@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace E_Smart.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20240630033608_UpdateCustomerTb")]
-    partial class UpdateCustomerTb
+    [Migration("20240630101042_UpdateOrderTB")]
+    partial class UpdateOrderTB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,6 +62,11 @@ namespace E_Smart.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Customer_name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("Customer_phone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -107,13 +112,7 @@ namespace E_Smart.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderDetailId"));
 
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Order_Id")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<int>("Product_Id")
@@ -127,9 +126,9 @@ namespace E_Smart.Migrations
 
                     b.HasKey("OrderDetailId");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("Order_Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("Product_Id");
 
                     b.ToTable("OrderDetails");
                 });
@@ -183,11 +182,15 @@ namespace E_Smart.Migrations
                 {
                     b.HasOne("E_Smart.Areas.Admin.Models.Order", "Order")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("Order_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("E_Smart.Areas.Admin.Models.Product", "Product")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("ProductId");
+                        .HasForeignKey("Product_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Order");
 

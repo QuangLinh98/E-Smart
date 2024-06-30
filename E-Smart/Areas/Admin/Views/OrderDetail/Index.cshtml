@@ -1,0 +1,37 @@
+﻿@model IEnumerable<E_Smart.Areas.Admin.Models.OrderDetail>
+
+<div class="row">
+	<h2>Order Detail List</h2>
+	<div class="col-12 text-end">
+	</div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Oder Id</th>
+				<th>Product</th>
+				<th>Unit Price</th>
+				<th>Quantity</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+
+			@foreach (var item in Model)
+			{
+				<tr>
+					<td>@item.Order_Id</td>
+					<td>@item.Product?.Product_name</td>
+					<td>@item.Unit_Price</td>
+					<td>@item.Quantity</td>
+
+					<td>
+						<a class="btn btn-danger" asp-route-id="@item.OrderDetailId" asp-action="Delete">
+							<i class="bi bi-trash3"></i>
+							Delete
+						</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>

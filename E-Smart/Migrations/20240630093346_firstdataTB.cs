@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace E_Smart.Migrations
 {
     /// <inheritdoc />
-    public partial class FirstData : Migration
+    public partial class firstdataTB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -33,7 +33,7 @@ namespace E_Smart.Migrations
                     Customer_code = table.Column<int>(type: "int", nullable: false),
                     Customer_email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Customer_address = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Customer_phone = table.Column<int>(type: "int", nullable: false)
+                    Customer_phone = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -95,7 +95,6 @@ namespace E_Smart.Migrations
                     Product_Id = table.Column<int>(type: "int", nullable: false),
                     Unit_Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: true),
                     OrderId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -107,10 +106,11 @@ namespace E_Smart.Migrations
                         principalTable: "Orders",
                         principalColumn: "OrderId");
                     table.ForeignKey(
-                        name: "FK_OrderDetails_Products_ProductId",
-                        column: x => x.ProductId,
+                        name: "FK_OrderDetails_Products_Product_Id",
+                        column: x => x.Product_Id,
                         principalTable: "Products",
-                        principalColumn: "ProductId");
+                        principalColumn: "ProductId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -119,9 +119,9 @@ namespace E_Smart.Migrations
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderDetails_ProductId",
+                name: "IX_OrderDetails_Product_Id",
                 table: "OrderDetails",
-                column: "ProductId");
+                column: "Product_Id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_CustomerId",

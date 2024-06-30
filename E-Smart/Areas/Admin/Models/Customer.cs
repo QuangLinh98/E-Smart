@@ -10,6 +10,10 @@ namespace E_Smart.Areas.Admin.Models
         public int CustomerId { get; set; }
 
         [Required]
+        [StringLength(50,MinimumLength = 2 ,ErrorMessage = "Please name must be between [2-50] character!")]
+        public string Customer_name { get; set; }
+
+        [Required]
         public int Customer_code { get; set; }
 
         [Required]

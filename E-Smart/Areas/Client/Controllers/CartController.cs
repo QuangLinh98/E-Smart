@@ -40,10 +40,6 @@ namespace E_Smart.Areas.Client.Controllers
 			return View(cartVM);    // Trả về trang CartItemViewModel
 		}
 
-		public ActionResult Checkout()
-		{
-			return View();
-		}
 
 		public async Task<IActionResult> Add(int id)
 		{
@@ -171,6 +167,11 @@ namespace E_Smart.Areas.Client.Controllers
 		public ActionResult ShoppingSuccess()
 		{
 		   return View();
+		}
+
+		public ActionResult Checkout()
+		{
+			return View();
 		}
 
 		//hàm xử lý Checkout
