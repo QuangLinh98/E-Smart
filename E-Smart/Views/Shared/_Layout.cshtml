@@ -17,6 +17,13 @@
 			updateCartBadge();
 		});
 	</script>
+
+	@*ChatBot AI*@
+	<script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+	<df-messenger intent="WELCOME"
+				  chat-title="E-Smart"
+				  agent-id="fd44ed49-1afb-4545-94b4-246b155566ad"
+				  language-code="vi"></df-messenger>
 </head>
 <body class="d-flex flex-column min-vh-100">
 	<header>
@@ -75,17 +82,18 @@
 							<li class="nav-item">
 								<a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">
 									<i class="bi bi-box-arrow-in-right"></i>
-									Login</a>
+									Login
+								</a>
 							</li>
 						}
 					</ul>
 					<ul class="navbar-nav">
-							<li class="nav-item">
-								<a class="nav-link" asp-area="" asp-controller="" asp-action="">
+						<li class="nav-item">
+							<a class="nav-link" asp-area="" asp-controller="" asp-action="">
 								<i class="bi bi-person-fill"></i>
-									Sign Up
-								</a>
-							</li>						
+								Sign Up
+							</a>
+						</li>
 					</ul>
 
 				</div>
@@ -103,11 +111,11 @@
 		</main>
 	</div>
 
-	<footer class="border-top footer bg-dark text-white mt-auto py-3 fixed-bottom">
+	@* <footer class="border-top footer bg-dark text-white mt-auto py-3 fixed-bottom">
 		<div class="text-center">
 			&copy; 2024 - E_Smart - with all <i class="bi bi-house-heart"></i> to you.
 		</div>
-	</footer>
+	</footer> *@
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>
 	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="~/js/site.js" asp-append-version="true"></script>
