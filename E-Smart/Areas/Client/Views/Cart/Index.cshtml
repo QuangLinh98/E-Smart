@@ -1,0 +1,139 @@
+﻿@using System.Text.Json
+@using E_Smart.Areas.Client.Models.ViewModels
+@model CartItemViewModel
+
+<section class="vh-100 bg-secondary">
+	<div class="container h-100 d-flex justify-content-between">
+		<div class="col-md-9">
+			<h2 class="text-center text-white">Shopping Cart</h2>
+			<div class="  ">
+
+				<div class="card mb-4">
+
+					@* Kiểm tra điều kiện của cartItem có dữ liệu hay không *@
+					@if (Model.CartItems.Count > 0)
+					{
+						@foreach (var item in Model.CartItems)
+						{
+							<div class="card-body p-4">
+								<div class="row align-items-center">
+									<div class="col-md-2">
+										@if (!string.IsNullOrEmpty(item.Image))
+										{
+											var imagePaths = JsonSerializer.Deserialize<List<string>>(item.Image);
+											foreach (var path in imagePaths)
+											{
+												<img src="~/@path" alt="Product Image" style="width: 60%; height: 100px;" />
+											}
+										}
+
+										@* 	<img src="~/Upload//product_images/@item.Image"
+								class="img-fluid" alt="Generic placeholder image"> *@
+									</div>
+									<div class="col-md-2 d-flex justify-content-center">
+										<div>
+											<p class="small text-muted mb-4 pb-2">Name</p>
+											<p class="lead fw-normal mb-0">@item.Name</p>
+										</div>
+									</div>
+
+									<div class="col-md-3 d-flex justify-content-center">
+										<div>
+											<p class="small text-muted mb-3 pb-2">Quantity</p>
+											<div class="d-flex justify-content-between">
+												<a class="btn btn-link px-2" asp-action="Decrease" asp-controller="Cart" asp-route-id="@item.Product_Id">
+													<i class="bi bi-dash"></i>
+												</a>
+
+												<input id="form1" min="0" name="quantity" value="@item.Quantity" type="text" size="2"
+													   class="form-control form-control-sm" style="width: 50px;" />
+
+												<a class="btn btn-link px-2" asp-action="Increase" asp-controller="Cart" asp-route-id="@item.Product_Id">
+													<i class="bi bi-plus"></i>
+												</a>
+											</div>
+
+										</div>
+									</div>
+									<div class="col-md-2 d-flex justify-content-center">
+										<div>
+											<p class="small text-muted mb-4 pb-2">Price</p>
+											<p class="lead fw-normal mb-0">$@item.Price</p>
+										</div>
+									</div>
+									<div class="col-md-2 d-flex justify-content-center">
+										<div>
+											<p class="small text-muted mb-4 pb-2">Total</p>
+											<p class="lead fw-normal mb-0">$@Model.CartItems.Where(c => c.Product_Id == @item.Product_Id).Sum(c => c.Quantity * c.Price).ToString()</p>
+										</div>
+									</div>
+
+									@*Remove Button Item *@
+									<div class="col-md-1 d-flex justify-content-center">
+										<a class="text-danger" asp-action="Remove" asp-controller="Cart" asp-route-id="@item.Product_Id">
+											<i class="bi bi-trash3"></i>
+										</a>
+									</div>
+								</div>
+
+							</div>
+						}
+
+					}
+					else
+					{
+						<h5 class="text-center">Your cart empty!</h5>
+					}
+				</div>
+
+				<div class="card mb-5">
+					<div class="card-body p-4">
+						<div class="float-end">
+							<a class="btn btn-danger px-2" asp-action="Clear" asp-controller="Cart">
+								<i class="bi bi-x-lg"></i>
+								Clear
+							</a>
+						</div>
+						<div class="float-end">
+							<p class="mb-0 me-5 d-flex align-items-center">
+								<span class="small text-muted me-2">Order total:</span> <span class="lead fw-normal">$@Model.GrandTotal.ToString()</span>
+							</p>
+						</div>
+					</div>
+
+				</div>
+				<div class="d-flex justify-content-end">
+					<a class="btn btn-secondary btn-lg me-2" asp-area="" asp-action="Index" asp-controller="Home">
+						<i class="bi bi-box-arrow-in-left"></i>
+						Continue shopping
+					</a>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-3 ps-2 mt-4">
+			@using (Html.BeginForm("Checkout", "Cart"))
+			{
+				<div class="form-outline" data-mdb-input-init>
+					<label class="form-label" for="Customer code">Customer code</label>
+					<input type="number" name="Code_Customer" class="form-control form-control-lg" required />
+				</div>
+
+				<div class="form-outline" data-mdb-input-init>
+					<label class="form-label" for="Address delivery">Address delivery</label>
+					<input type="text" name="Address_Delivery" class="form-control" required />
+				</div>
+				<div class="mt-2 float-end">
+					<a asp-area="Admin" asp-controller="Customer" asp-action="CustomerRegister" class="btn btn-primary">Register</a>
+					<input type="submit" asp-area="Client" asp-controller="Cart" asp-action="Checkout" class="btn btn-primary" value="Checkout" />
+				</div>
+
+			}
+		</div>
+
+
+
+	</div>
+</section>
+

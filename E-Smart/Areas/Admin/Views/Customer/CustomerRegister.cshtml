@@ -1,0 +1,28 @@
+﻿@model E_Smart.Areas.Admin.Models.Customer
+
+<form asp-action="CustomerRegister">
+    <h3>Register form</h3>
+    <div class="mb-3" >
+        <label for="exampleInputEmail1" class="form-label">Email address</label>
+        <input type="email" class="form-control" placeholder="Please enter email" asp-for="Customer_email" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="Customer_code" class="form-label">Code</label>
+        <input type="number" class="form-control" placeholder="Please enter code number" asp-for="Customer_code" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="Customer_address" class="form-label">Address</label>
+        <input type="text" class="form-control" placeholder="Please enter your address" asp-for="Customer_address" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="Customer_phone" class="form-label">Phone</label>
+        <input type="number" class="form-control" placeholder="Please enter phone" asp-for="Customer_phone" required>
+    </div>
+
+
+    <a type="submit" class="btn btn-primary" asp-area="Client" asp-action="Index" asp-controller="Cart">Back</a>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

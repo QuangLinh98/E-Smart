@@ -1,0 +1,115 @@
+﻿@using System.Text.Json
+@model IEnumerable<E_Smart.Areas.Admin.Models.Product>
+
+<div class="row pb-3">
+	@foreach (var item in Model)
+	{
+
+		<div class="col-lg-3 col-sm-6" style="background-color: #eee;">
+			<div class="row p-2 ">
+				<div class="col-md-12 col-lg-4 mb-4 mb-lg-0">
+					<div class="card" style="width: 18rem; height: 27rem">
+						<div style="width:100%">
+							@if (!string.IsNullOrEmpty(item.Product_imagePaths))
+							{
+								var imagePaths = JsonSerializer.Deserialize<List<string>>(item.Product_imagePaths);
+								foreach (var path in imagePaths)
+								{
+									<img src="~/@path" alt="Product Image" style="width: 100%; height: 250px;" />
+								}
+							}
+						</div>
+
+						<div class="card-body ">
+
+							<div class="text-center mb-3">
+								<h5 class="mb-0">@item.Product_name</h5>
+
+							</div>
+
+							<div class=" mb-3">
+
+								<p class="text-muted mb-0">Price: <span class="fw-bold">$@item.Product_price</span></p>
+							</div>
+
+							<div class="d-flex justify-content-between mb-2">
+								<p class="text-muted mb-0">Quantity: <span class="fw-bold">@item.Product_quantity</span></p>
+							</div>
+
+							<div class="col-12">
+								<button type="button" class="btn btn-secondary" style="width:100%" onclick="addToCart(@item.ProductId)">
+									<i class="bi bi-cart-plus-fill"></i>
+									Add to cart
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+	}
+
+</div>
+
+@section scripts
+{
+	@*Đoạn CDN hiển thị thông báo alert*@
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	<script>
+		function addToCart(productId) {
+			$.ajax({
+				url: '/Client/Cart/Add/' + productId, // Replace with your actual URL
+				type: 'POST',
+				success: function (response) {
+					//Log data ra
+					console.log(response); 
+
+					//alert hiên thị thông báo success 
+					Swal.fire({
+						icon: "success",
+						title: "Add to cart successfully!",
+						timer: 1500
+					});
+
+					// Call the updateCartBadge function to update cartitem on the navbar 
+					updateCartBadge(); 
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					// Handle errors (e.g., display error message)
+					console.error("Error adding to cart:", textStatus, errorThrown);
+
+					//alert hiên thị thông báo error
+					Swal.fire({
+						icon: "error",
+						title: "Add to cart failed",
+						text: "Please! Try again.",
+						timer: 1500
+					});
+				}
+			});
+		}
+	</script>
+
+	@*Xử lý Update quantity Cart trên thanh navbar *@
+	<script>
+		function updateCartBadge() {
+			// AJAX request to get updated cart count
+			$.ajax({
+				url: '/Client/Cart/GetCartCount', // Replace with your actual URL
+				success: function (response) {
+					// Update the element containing the cart badge count
+					const cartBadgeElement = document.getElementById('cartBadge');
+					if (cartBadgeElement) {
+						cartBadgeElement.textContent = response.cartCount;
+					}
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					console.error("Error fetching cart count:", textStatus, errorThrown);
+				}
+			});
+		}
+	</script>
+}

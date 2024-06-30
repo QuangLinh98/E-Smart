@@ -1,0 +1,51 @@
+﻿@model E_Smart.Areas.Admin.Models.Product
+
+<div class="card shadow boder-0 mt-4">
+	<div class="card-body p-4">
+		<h2>Product form create</h2>
+		<form class="bg-gray" asp-action="Create" enctype="multipart/form-data">
+			<div class="mb-3 mt-3 form-group">
+				<label for="name">Name:</label>
+				<input type="text" class="form-control"
+					   placeholder="Enter Name" asp-for="Product_name">
+				<span class="text-danger" asp-validation-for="Product_name"></span>
+			</div>
+
+			<div class="mb-3 mt-3 form-group">
+				<label for="Price">Price:</label>
+				<input type="number" class="form-control"
+					   placeholder="Enter Price" asp-for="Product_price">
+				<span class="text-danger" asp-validation-for="Product_price"></span>
+			</div>
+
+			<div class="mb-3 mt-3">
+				<label for="Category">Category:</label>
+				<select asp-items="@ViewBag.Category" class="form-select"
+						asp-for="Category_Id"></select>
+			</div>
+
+			<div class="mb-3 mt-3 form-group">
+				<label for="Quantity">Quantity:</label>
+				<input type="number" class="form-control"
+					   placeholder="Enter Quantity" asp-for="Product_quantity">
+				<span class="text-danger" asp-validation-for="Product_quantity"></span>
+			</div>
+
+			<div class="mb-3 mt-3 form-group">
+				<label for="Description">Description:</label>
+				<textarea type="text" class="form-control"
+						  placeholder="Enter Description" asp-for="Product_description"></textarea>
+
+				<span class="text-danger" asp-validation-for="Product_description"></span>
+			</div>
+
+			<div class="mb-3 mt-3 form-group">
+				<label for="Product_imageFiles">Images:</label>
+				<input type="file" name="Product_imageFiles" class="form-control" asp-for="Product_imageFiles" multiple />
+				<span class="text-danger" asp-validation-for="Product_imageFiles"></span>
+			</div>
+			<button type="submit" class="btn btn-secondary" asp-action="Index">Back</button>
+			<button type="submit" class="btn btn-secondary">Submit</button>
+		</form>
+	</div>
+</div>

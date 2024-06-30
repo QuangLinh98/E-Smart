@@ -1,0 +1,36 @@
+﻿@model IEnumerable<E_Smart.Areas.Admin.Models.Category>
+
+<div class="row">
+	<h2>Category List</h2>
+	<div class="col-12 text-end">
+		<a class="btn btn-secondary" asp-action="Create" asp-area="Admin">
+			<i class="bi bi-plus-circle"></i>
+			Create a new Category
+		</a>
+	</div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Name</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+
+			@foreach (var item in Model)
+			{
+				<tr>
+					<td>@item.CategoryId</td>
+					<td>@item.Category_name</td>
+					<td>
+						<a class="btn btn-warning" asp-route-id="@item.CategoryId" asp-action="Edit">
+							<i class="bi bi-pencil-square"></i>
+							Edit
+						</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>

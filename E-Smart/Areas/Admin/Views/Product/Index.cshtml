@@ -1,0 +1,58 @@
+﻿@using System.Text.Json
+@model IEnumerable<E_Smart.Areas.Admin.Models.Product>
+
+<div class="row">
+	<h2>Product List</h2>
+	<div class="col-12 text-end">
+		<a class="btn btn-secondary" asp-action="Create" asp-area="Admin">
+			<i class="bi bi-plus-circle"></i>
+			Create a new Product</a>
+	</div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Name</th>
+				<th>Price</th>
+				<th>Quantity</th>
+				<th>Category</th>
+				<th>Image</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+
+			@foreach (var item in Model)
+			{
+				<tr>
+					<td>@item.ProductId</td>
+					<td>@item.Product_name</td>
+					<td>@item.Product_price</td>
+					<td>@item.Product_quantity</td>
+					<td>@item.Category?.Category_name</td>
+					<td>
+						@if (!string.IsNullOrEmpty(item.Product_imagePaths))
+						{
+							var imagePaths = JsonSerializer.Deserialize<List<string>>(item.Product_imagePaths);
+							foreach (var path in imagePaths)
+							{
+								<img src="~/@path" alt="Product Image" style="width: 100px; height: auto;" />
+							}
+						}
+
+					</td>
+					<td>
+						<a class="btn btn-warning" asp-route-id="@item.ProductId" asp-action="Edit">
+							<i class="bi bi-pencil-square"></i>
+							Edit
+						</a>
+						<a class="btn btn-danger" asp-route-id="@item.ProductId" asp-action="Delete">
+							<i class="bi bi-trash3"></i>
+							Delete
+						</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>

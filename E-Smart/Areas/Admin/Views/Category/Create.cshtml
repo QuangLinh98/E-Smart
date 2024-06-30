@@ -1,0 +1,13 @@
+﻿@model E_Smart.Areas.Admin.Models.Category
+
+<div class="row">
+    <h2>Category form create</h2>
+    <form asp-action="Create">
+        <div class="mb-3 mt-3">
+            <label for="name">Name:</label>
+            <input type="text" class="form-control"
+                   placeholder="Enter Name" asp-for="Category_name">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
