@@ -17,6 +17,7 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 builder.Services.AddScoped<ICategoryRepository,CategoryService>();
 builder.Services.AddScoped<IProductRepository,ProductService>();
 builder.Services.AddScoped<ICustomerRepository,CustomerService>();
+builder.Services.AddScoped<IOrderRepository,OrderService>();
 
 
 //Đăng ký dịch vụ lưu trữ Cache cho phần lưu dữ liệu của order
