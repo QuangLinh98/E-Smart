@@ -1,32 +1,42 @@
-﻿using System.Text.Json;
+﻿
+using System.Text.Json;
 using E_Smart.Areas.Admin.Models;
 using E_Smart.Areas.Admin.Repository;
+using E_Smart.Data;
 using E_Smart.Helper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using X.PagedList;
 
 namespace E_Smart.Areas.Admin.Controllers
 {
     [Area("admin")]
     public class ProductController : Controller
     {
+        private readonly DatabaseContext _dbContext;
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ProductController(IProductRepository productRepository, IWebHostEnvironment webHostEnvironment, ICategoryRepository categoryRepository)
+        public ProductController(IProductRepository productRepository, IWebHostEnvironment webHostEnvironment, ICategoryRepository categoryRepository, DatabaseContext dbContext)
         {
             _productRepository = productRepository;
             _webHostEnvironment = webHostEnvironment;
             _categoryRepository = categoryRepository;
+            _dbContext = dbContext;
         }
 
-        public async Task<IActionResult> Index()
+        //Hiển thị danh sách kèm chức năng phân trang
+        public async Task<IActionResult> Index(int? page)
         {
+            int pageSize = 5; 
             var products = await _productRepository.GetAllProduct();
-            return View(products);
+
+			var paginatedProducts = products.ToPagedList(page ?? 1, pageSize);   //?? nêu bị null sẽ gán = 1
+			return View(paginatedProducts);
         }
 
-        public async Task<IActionResult> Create()
+
+		public async Task<IActionResult> Create()
         {
             var categories = await _categoryRepository.GetAllCategory();
             ViewBag.Category = new SelectList(categories, "CategoryId", "Category_name", "CategoryId");
@@ -167,6 +177,16 @@ namespace E_Smart.Areas.Admin.Controllers
             }
         }
 
+        #region  API CALLS
 
-    }
+        [HttpGet]
+        [Route("api/products")]
+        public IEnumerable<Product> GetProducts() 
+        {
+          return (IEnumerable<Product>)_productRepository.GetAllProduct();
+        }
+
+		#endregion
+
+	}
 }

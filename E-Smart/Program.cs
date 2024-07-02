@@ -1,7 +1,9 @@
 using E_Smart.Areas.Admin.Repository;
 using E_Smart.Areas.Admin.Service;
 using E_Smart.Data;
+using E_Smart.Utilities;
 using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +33,9 @@ builder.Services.AddSession(options =>
 	options.Cookie.IsEssential = true;
 });
 
+/*//Cấu hình Thanh toán Stripe
+builder.Services.Configure<StripeSetting>(builder.Configuration.GetSection("Stripe"));   //Stripe bên phần appSetting*/
+
 
 
 var app = builder.Build();
@@ -50,6 +55,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+/*//Cấu hình Thanh toán Stripe
+StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();*/
 
 app.UseRouting();
 
