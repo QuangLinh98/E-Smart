@@ -30,11 +30,29 @@ namespace E_Smart.Areas.Admin.Service
 			return orders; ;
 		}
 
-		
+
 		public async Task<Order> GetOneOrder(int id)
 		{
 			var existingOrder = await _dbContext.Orders.FindAsync(id);
 			return existingOrder;
+		}
+
+		public async Task<IEnumerable<OrderDetail>> GetOrderDetails(int orderID)
+		{
+			return await _dbContext.OrderDetails.Where(od => od.Order_Id == orderID)
+				                                .Include(od => od.Product)
+												.ToListAsync();
+		}
+
+		public async Task UpdateOrderStatus(int id, string status)
+		{
+			var orderID = await _dbContext.Orders.FindAsync(id);
+			if (orderID != null)
+			{
+				orderID.Status = status;
+				_dbContext.Orders.Update(orderID);
+				await _dbContext.SaveChangesAsync();
+			}
 		}
 	}
 }

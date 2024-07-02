@@ -187,6 +187,7 @@ namespace E_Smart.Areas.Client.Controllers
 				order.Order_date = DateTime.Now;
 				order.CustomerCode = int.Parse(form["Code_Customer"]);   // Lấy mã code tại fomr Checkout, vì Code_Customer là dạng số lên cần ép kiểu để lưu sang dạng chuôi
 				order.Order_description = form["Address_Delivery"];    // Lấy địa chỉ bên form checkout 
+				order.Status = "Pending";
 			 
 				_dbContext.Orders.Add(order);   // Add Order vào database
 				_dbContext.SaveChanges();

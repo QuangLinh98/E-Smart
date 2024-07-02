@@ -7,10 +7,13 @@
 	<table class="table">
 		<thead>
 			<tr>
-				<th>Customer Code</th>
-				<th>Address</th>
-				<th>Order Date</th>
-				<th>Action</th>
+				<th class ="text-center">OrderId</th>
+				<th class="text-center">Customer Code</th>
+				<th class="text-center">Address</th>
+				<th class="text-center">Order Date</th>
+				<th class="text-center">Status</th>
+				<th class="text-center">Start processing</th>
+				<th class="text-center">Action</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -18,14 +21,30 @@
 			@foreach (var item in Model)
 			{
 				<tr>
+					<td>@item.OrderId</td>
 					<td>@item.CustomerCode</td>
 					<td>@item.Order_description</td>
 					<td>@item.Order_date</td>
+					<td>@item.Status</td>
 
 					<td>
+						@if (item.Status == "Pending")
+						{
+							<a class="btn btn-primary" asp-route-id="@item.OrderId" asp-action="Approve">Approve</a>
+						}
+						else if (item.Status == "Approved")
+						{
+							<a class="btn btn-success" asp-route-id="@item.OrderId" asp-action="ShipOrder">ShipOrder</a>
+						}
 						<a class="btn btn-danger" asp-route-id="@item.OrderId" asp-action="Delete">
 							<i class="bi bi-trash3"></i>
-							Delete
+						Cancel
+						</a>
+					</td>
+					<td>
+						<a class="btn btn-primary" asp-area="Admin" asp-route-id="@item.OrderId" asp-action="ShowViewOrderDetail">
+							<i class="bi bi-eye"></i>
+							Order Detail
 						</a>
 					</td>
 				</tr>

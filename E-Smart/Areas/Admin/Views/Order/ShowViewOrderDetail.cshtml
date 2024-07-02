@@ -1,0 +1,35 @@
+﻿@model IEnumerable<E_Smart.Areas.Admin.Models.OrderDetail>
+
+<div class="row">
+	
+	<div class="col-12 d-flex justify-content-between">
+		<h2>Order Detail</h2>
+		<a class="btn btn-secondary" asp-area="Admin" asp-action="Index" asp-controller="Order">
+			<i class="bi bi-box-arrow-in-left"></i>
+			Back
+		</a>
+	</div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Oder Id</th>
+				<th>Product</th>
+				<th>Unit Price</th>
+				<th>Quantity</th>
+			</tr>
+		</thead>
+		<tbody>
+
+			@foreach (var item in Model)
+			{
+				<tr>
+					<td>@item.Order_Id</td>
+					<td>@item.Product?.Product_name</td>
+					<td>@item.Unit_Price</td>
+					<td>@item.Quantity</td>
+
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
