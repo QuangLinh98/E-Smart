@@ -1,6 +1,8 @@
 using E_Smart.Areas.Admin.Repository;
 using E_Smart.Areas.Admin.Service;
 using E_Smart.Data;
+using E_Smart.Mail;
+using E_Smart.Service;
 using E_Smart.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +23,10 @@ builder.Services.AddScoped<IProductRepository,ProductService>();
 builder.Services.AddScoped<ICustomerRepository,CustomerService>();
 builder.Services.AddScoped<IOrderRepository,OrderService>();
 builder.Services.AddScoped<IOrderDetailRepository,OrderDetailService>();
+
+//Đăng ký Service Email
+builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("EmailSetting"));
+builder.Services.AddTransient<EmailService>();
 
 
 //Đăng ký dịch vụ lưu trữ Cache cho phần lưu dữ liệu của order

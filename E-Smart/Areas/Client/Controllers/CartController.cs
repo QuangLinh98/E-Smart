@@ -1,5 +1,4 @@
-﻿using Azure;
-using System;
+﻿
 using E_Smart.Areas.Admin.Models;
 using E_Smart.Areas.Admin.Repository;
 using E_Smart.Areas.Client.Models;
@@ -9,21 +8,29 @@ using E_Smart.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis;
+using System.Net;
+using System.Net.Mail;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.EntityFrameworkCore;
+using E_Smart.Service;
+
+
+
 
 namespace E_Smart.Areas.Client.Controllers
 {
 	[Area("client")]
 	public class CartController : Controller
 	{
-
+		private readonly EmailService _emailService;
 		private readonly DatabaseContext _dbContext;
 		private readonly IProductRepository _productRepository;
 
-		public CartController(IProductRepository productRepository, DatabaseContext dbContext)
+		public CartController(IProductRepository productRepository, DatabaseContext dbContext, EmailService emailService)
 		{
 			_productRepository = productRepository;
 			_dbContext = dbContext;
+			_emailService = emailService;
 		}
 
 		// Giỏ hàng
@@ -46,7 +53,6 @@ namespace E_Smart.Areas.Client.Controllers
 			// Get All Product
 			Product product = await _productRepository.GetProduct(id);
 
-
 			//Create the cart list  
 			List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart") ?? new List<CartItem>();
 
@@ -62,8 +68,6 @@ namespace E_Smart.Areas.Client.Controllers
 			//Lưu trữ dữ liệu cart trong Session
 			HttpContext.Session.SetJson("Cart", cart);
 
-			//Hiển thị thông báo Thành công trong folder _NotificationPartial
-			//TempData["success"] = "Add item to cart Successfully!";
 
 			// Return JSON response
 			return Json(new { success = true, message = "Item added to cart successfully!" });
@@ -156,7 +160,7 @@ namespace E_Smart.Areas.Client.Controllers
 		public async Task<IActionResult> GetCartCount()
 		{
 			// Get cart items from session
-			List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart") ;
+			List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart");
 
 			// Calculate total cart quantity
 			int cartCount = cart.Sum(item => item.Quantity);
@@ -166,7 +170,7 @@ namespace E_Smart.Areas.Client.Controllers
 
 		public ActionResult ShoppingSuccess()
 		{
-		   return View();
+			return View();
 		}
 
 		public ActionResult Checkout()
@@ -176,26 +180,26 @@ namespace E_Smart.Areas.Client.Controllers
 
 		//hàm xử lý Checkout
 		[HttpPost]
-		public ActionResult Checkout (IFormCollection form)
+		public async Task<ActionResult> Checkout(IFormCollection form)
 		{
 			try
 			{
-				List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart") ;
-				
+				List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart");
+
 				//Lưu thông tin vào bảng Order
 				Order order = new Order();
 				order.Order_date = DateTime.Now;
 				order.CustomerCode = int.Parse(form["Code_Customer"]);   // Lấy mã code tại fomr Checkout, vì Code_Customer là dạng số lên cần ép kiểu để lưu sang dạng chuôi
 				order.Order_description = form["Address_Delivery"];    // Lấy địa chỉ bên form checkout 
 				order.Status = "Pending";
-			 
+
 				_dbContext.Orders.Add(order);   // Add Order vào database
 				_dbContext.SaveChanges();
 
 
 				// Lưu vào bảng OrderDetail
 				foreach (var item in cart)
-                {
+				{
 					OrderDetail orderDetail = new OrderDetail();
 
 					//Lấy cái OrderId để lưu vào bảng OrderDetail
@@ -208,18 +212,45 @@ namespace E_Smart.Areas.Client.Controllers
 				}
 
 				_dbContext.SaveChanges();
-				cart.Clear();    // Sau khi checkout thì sẽ xóa hết giỏ hàng
+				
 				HttpContext.Session.SetJson("Cart", cart);     // Sau khi clear cần cập nhật lại giỏ hàng có trong session
 
-				return RedirectToAction("ShoppingSuccess","Cart");
-            }
-			catch 
+				// SEND MAIL LOGIC
+				// Tìm khách hàng bằng CustomerCode
+				var customer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.Customer_code == order.CustomerCode);
+				if (customer == null)
+				{
+					return Content("Customer not found. Please check the customer code.");
+				}
+
+				var subject = "Confirm your order.";
+				//var body = $"Thank you for your order! Your order number is {order.OrderId}";
+				var body = $"Dear {customer.Customer_name},<br/><br/>Thank you for your order!<br/><br/>Order details:<br/><br/>";
+				body += $"Order number: {order.OrderId}<br/>";
+				body += "-------------------------<br/>";
+				foreach (var item in cart)
+				{
+					body += $"{item.Name} ,Quantity: {item.Quantity}, Price: {item.Price:C}<br/>";
+				}
+				body += "-------------------------<br/><br/>";
+				body += "Total amount: " + cart.Sum(item => item.Quantity * item.Price).ToString("C") + "<br/><br/>";
+				body += "We will notify you once your order has been processed.<br/><br/>";
+				body += "Thank you for shopping with us!<br/><br/>Best regards,<br/>Your Store Team";
+
+				await _emailService.SendEmail(customer.Customer_email, subject, body);
+
+				cart.Clear();    // Sau khi checkout thì sẽ xóa hết giỏ hàng
+			
+				// Chuyển hướng đến trang xác nhận đặt hàng thành công
+				return RedirectToAction("ShoppingSuccess", "Cart");
+			}
+			catch (Exception ex)
 			{
-				return Content("Error checkout . Please try to check infomation of Customer...");
+				ModelState.AddModelError("", ex.Message);
+				return View();
 			}
 		}
 
-		
 	}
 }
 
