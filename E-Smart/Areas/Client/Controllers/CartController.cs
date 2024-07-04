@@ -13,6 +13,7 @@ using System.Net.Mail;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.EntityFrameworkCore;
 using E_Smart.Service;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 
 
@@ -25,12 +26,14 @@ namespace E_Smart.Areas.Client.Controllers
 		private readonly EmailService _emailService;
 		private readonly DatabaseContext _dbContext;
 		private readonly IProductRepository _productRepository;
+		private readonly IVnPayService _vnPayService;
 
-		public CartController(IProductRepository productRepository, DatabaseContext dbContext, EmailService emailService)
+		public CartController(IProductRepository productRepository, DatabaseContext dbContext, EmailService emailService, IVnPayService vnPayService)
 		{
 			_productRepository = productRepository;
 			_dbContext = dbContext;
 			_emailService = emailService;
+			_vnPayService = vnPayService;
 		}
 
 		// Giỏ hàng
@@ -180,11 +183,27 @@ namespace E_Smart.Areas.Client.Controllers
 
 		//hàm xử lý Checkout
 		[HttpPost]
-		public async Task<ActionResult> Checkout(IFormCollection form)
+		public async Task<ActionResult> Checkout(IFormCollection form , string payment = "COD")
 		{
 			try
 			{
 				List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart");
+
+				//Thanh toán trước bằng VnPay
+				if (payment == "Checkout VnPay")
+                {
+					var vnPayModel = new VnPaymentRequestModel
+					{
+						Amount = cart.Sum(p => p.Total),
+						CreatedDate = DateTime.Now,
+						FullName = cart[0].Name,
+						OrderId = new Random().Next(1000,10000)
+
+					};
+					return Redirect(_vnPayService.CreatePaymentUrl(HttpContext, vnPayModel));
+                }
+
+                
 
 				//Lưu thông tin vào bảng Order
 				Order order = new Order();
@@ -249,6 +268,28 @@ namespace E_Smart.Areas.Client.Controllers
 				ModelState.AddModelError("", ex.Message);
 				return View();
 			}
+		}
+
+		//Trang thông báo lỗi
+		public IActionResult PaymentFail()
+		{
+			return View();
+		}
+
+
+		public IActionResult PaymentCallBack()
+		{
+			var response = _vnPayService.PaymentExecute(Request.Query);
+            if (response == null || response.VnPayResponseCode != "00")
+            {
+				TempData["Message"] = $"Checkout VnPay error! {response.VnPayResponseCode}";
+				return RedirectToAction("PaymentFail");
+            }
+
+			// Lưu đơn hàng vào database
+
+			TempData["Message"] = $"Checkout VnPay successfully";
+			return RedirectToAction("ShoppingSuccess");
 		}
 
 	}

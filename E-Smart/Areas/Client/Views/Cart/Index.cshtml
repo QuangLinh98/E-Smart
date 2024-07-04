@@ -131,9 +131,13 @@
 					<label class="form-label" for="Address delivery">Address delivery</label>
 					<input type="text" name="Address_Delivery" class="form-control" required />
 				</div>
-				<div class="mt-2 float-end">
+				<div class="mt-2" >
 					<a asp-area="Admin" asp-controller="Customer" asp-action="CustomerRegister" class="btn btn-primary">Register</a>
-					<input type="submit" asp-area="Client" asp-controller="Cart" asp-action="Checkout" class="btn btn-primary" value="Checkout" />
+					<input type="submit" name="payment" asp-area="Client" asp-controller="Cart" asp-action="Checkout" class="btn btn-primary" value="Checkout COD" />
+				</div>
+
+				<div class="mt-2">
+					<input type="submit" name="payment" asp-area="Client" asp-controller="Cart" asp-action="Checkout" class="btn btn-primary" value="Checkout VnPay" />
 				</div>
 
 			}

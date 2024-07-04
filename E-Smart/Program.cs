@@ -28,6 +28,9 @@ builder.Services.AddScoped<IOrderDetailRepository,OrderDetailService>();
 builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("EmailSetting"));
 builder.Services.AddTransient<EmailService>();
 
+//Đăng ký VnPayCLient dạng Singleton() - chỉ có 1 instance duy nhất trong toàn ứng dụng
+builder.Services.AddSingleton<IVnPayService, VnPayService>();
+
 
 //Đăng ký dịch vụ lưu trữ Cache cho phần lưu dữ liệu của order
 builder.Services.AddDistributedMemoryCache();
