@@ -293,7 +293,7 @@ namespace E_Smart.Areas.Client.Controllers
 
 
 
-		public IActionResult PaymentCallBack(IFormCollection form)
+		public IActionResult PaymentCallBack()
 		{
 			var response = _vnPayService.PaymentExecute(Request.Query);
 			if (response == null || response.VnPayResponseCode != "00")
@@ -327,7 +327,7 @@ namespace E_Smart.Areas.Client.Controllers
 				Order_date = DateTime.Now,
 				CustomerCode = customerCode.Value,
 				Order_description = addressDelivery,
-				Status = "Pending"
+				Status = "Paid-VnPay"   // Đánh dấu đơn hàng đã thanh toán khi callback từ VnPay thành công
 			};
 
 			// Lưu đơn hàng và chi tiết đơn hàng vào cơ sở dữ liệu
