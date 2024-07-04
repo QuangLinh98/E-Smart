@@ -204,49 +204,40 @@ namespace E_Smart.Areas.Client.Controllers
 			_dbContext.SaveChanges();
 		}
 
-		//Trang thông báo lỗi
+		//TRANG THÔNG BÁO LỖI
 		public IActionResult PaymentFail()
 		{
 			return View();
 		}
 
-		//hàm xử lý Checkout
+		//PHƯƠNG THỨC CHUẨN BỊ THÔNG TIN CHUNG CHO VIỆC THANH TOÁN 
+		private void PrepareCheckout(IFormCollection form)
+		{
+			var customerCode = int.Parse(form["Code_Customer"]);
+			var addressDelivery = form["Address_Delivery"];
+
+			// Lưu thông tin khách hàng vào session
+			HttpContext.Session.SetInt32("CustomerCode", customerCode);
+			HttpContext.Session.SetString("AddressDelivery", addressDelivery);
+		}
+
+		// PHƯƠNG THỨC XỬ LÝ THANH TOÁN BẰNG COD
 		[HttpPost]
-		public async Task<ActionResult> Checkout(IFormCollection form, string payment = "COD")
+		public async Task<ActionResult> CheckoutCOD(IFormCollection form)
 		{
 			try
 			{
 				List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart");
 
-				var customerCode = int.Parse(form["Code_Customer"]);
-				var addressDelivery = form["Address_Delivery"];
+				// Chuẩn bị thông tin chung cho việc thanh toán
+				PrepareCheckout(form);
 
-				// Lưu thông tin khách hàng vào session
-				HttpContext.Session.SetInt32("CustomerCode", customerCode);
-				HttpContext.Session.SetString("AddressDelivery", addressDelivery);
-
-				//Thanh toán trước bằng VnPay
-				if (payment == "Checkout VnPay")
-				{
-					var vnPayModel = new VnPaymentRequestModel
-					{
-						Amount = cart.Sum(p => p.Total),
-						CreatedDate = DateTime.Now,
-						FullName = cart[0].Name,
-						OrderId = new Random().Next(1000, 10000)
-
-					};
-					return Redirect(_vnPayService.CreatePaymentUrl(HttpContext, vnPayModel));
-				}
-				//End thanh toán bằng Payment
-
-				//THANH TOÁN BẰNG COD
 				// Tạo đối tượng Order và lưu vào bảng Orders
 				Order order = new Order
 				{
 					Order_date = DateTime.Now,
-					CustomerCode = int.Parse(form["Code_Customer"]),    // Lấy mã code tại fomr Checkout, vì Code_Customer là dạng số lên cần ép kiểu để lưu sang dạng chuôi
-					Order_description = form["Address_Delivery"],      // Lấy địa chỉ bên form checkout 
+					CustomerCode = int.Parse(form["Code_Customer"]),
+					Order_description = form["Address_Delivery"],
 					Status = "Pending"
 				};
 
@@ -254,8 +245,7 @@ namespace E_Smart.Areas.Client.Controllers
 				SaveOrder(order, cart);
 				HttpContext.Session.SetJson("Cart", new List<CartItem>());
 
-				// SEND MAIL LOGIC
-				// Tìm khách hàng bằng CustomerCode
+				// Gửi email xác nhận đơn hàng
 				var customer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.Customer_code == order.CustomerCode);
 				if (customer == null)
 				{
@@ -263,7 +253,6 @@ namespace E_Smart.Areas.Client.Controllers
 				}
 
 				var subject = "Confirm your order.";
-				//var body = $"Thank you for your order! Your order number is {order.OrderId}";
 				var body = $"Dear {customer.Customer_name},<br/><br/>Thank you for your order!<br/><br/>Order details:<br/><br/>";
 				body += $"Order number: {order.OrderId}<br/>";
 				body += "-------------------------<br/>";
@@ -278,7 +267,7 @@ namespace E_Smart.Areas.Client.Controllers
 
 				await _emailService.SendEmail(customer.Customer_email, subject, body);
 
-				cart.Clear();    // Sau khi checkout thì sẽ xóa hết giỏ hàng
+				cart.Clear();
 
 				// Chuyển hướng đến trang xác nhận đặt hàng thành công
 				return RedirectToAction("ShoppingSuccess", "Cart");
@@ -290,9 +279,37 @@ namespace E_Smart.Areas.Client.Controllers
 			}
 		}
 
+		// PHƯƠNG THỨC XỬ LÝ THANH TOÁN BẰNG VnPay
+		[HttpPost]
+		public ActionResult CheckoutVnPay()
+		{
+			try
+			{
+				List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart");
 
+				// Chuẩn bị thông tin chung cho việc thanh toán
+				PrepareCheckout(HttpContext.Request.Form);
 
+				// Chuẩn bị dữ liệu cho thanh toán bằng VnPay
+				var vnPayModel = new VnPaymentRequestModel
+				{
+					Amount = cart.Sum(p => p.Total),
+					CreatedDate = DateTime.Now,
+					FullName = cart[0].Name,
+					OrderId = new Random().Next(1000, 10000)
+				};
 
+				// Chuyển hướng đến cổng thanh toán VnPay
+				return Redirect(_vnPayService.CreatePaymentUrl(HttpContext, vnPayModel));
+			}
+			catch (Exception ex)
+			{
+				ModelState.AddModelError("", ex.Message);
+				return View();
+			}
+		}
+
+		// Xử lý khi thanh toán thành công qua VnPay và callback về hệ thống
 		public IActionResult PaymentCallBack()
 		{
 			var response = _vnPayService.PaymentExecute(Request.Query);
