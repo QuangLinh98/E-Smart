@@ -15,9 +15,6 @@ using Microsoft.EntityFrameworkCore;
 using E_Smart.Service;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-
-
-
 namespace E_Smart.Areas.Client.Controllers
 {
 	[Area("client")]
@@ -36,10 +33,14 @@ namespace E_Smart.Areas.Client.Controllers
 			_vnPayService = vnPayService;
 		}
 
-		// Giỏ hàng
+		// GIỎ HÀNG
 		public IActionResult Index()
 		{
 			List<CartItem> cartItems = HttpContext.Session.GetJson<List<CartItem>>("Cart") ?? new List<CartItem>();
+
+			//Show message 
+			var message = TempData["Message"] as string;
+			ViewBag.Message = message;
 
 			//Lấy ra CartItemViewModel
 			CartItemViewModel cartVM = new()
@@ -50,7 +51,7 @@ namespace E_Smart.Areas.Client.Controllers
 			return View(cartVM);    // Trả về trang CartItemViewModel
 		}
 
-
+		//HÀM XỬ LÝ ADD SẢN PHẨM VÀO GIỎ HÀNG
 		public async Task<IActionResult> Add(int id)
 		{
 			// Get All Product
@@ -76,7 +77,7 @@ namespace E_Smart.Areas.Client.Controllers
 			return Json(new { success = true, message = "Item added to cart successfully!" });
 		}
 
-		//HÀm xử lý tăng số lượng 
+		//HÀM XỬ LÝ TĂNG SỐ LƯỢNG CỦA SẢN PHẨM  (+) 
 		public async Task<IActionResult> Increase(int id)
 		{
 			List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart");
@@ -104,7 +105,7 @@ namespace E_Smart.Areas.Client.Controllers
 			return RedirectToAction("Index");
 		}
 
-		//HÀm xử lý giảm số lượng 
+		//HÀM XỬ LÝ GIẢM SỐ LƯỢNG CỦA SẢN PHẨM  (-)
 		public async Task<IActionResult> Decrease(int id)
 		{
 			//Lấy tất cả sản phẩm 
@@ -133,7 +134,7 @@ namespace E_Smart.Areas.Client.Controllers
 			return RedirectToAction("Index");
 		}
 
-		//HÀm xử lý xóa 1 sản phẩm 
+		//HÀM XỬ LÝ XÓA TOÀN 1 SẢN PHẨM GIỎ HÀNG 
 		public async Task<IActionResult> Remove(int id)
 		{
 			//Lấy tất cả sản phẩm
@@ -152,14 +153,14 @@ namespace E_Smart.Areas.Client.Controllers
 			return RedirectToAction("Index");
 		}
 
-		//HÀm xử lý xóa toàn bộ giỏ hàng 
+		//HÀM XỬ LÝ XÓA TOÀN BỘ GIỎ HÀNG 
 		public async Task<IActionResult> Clear()
 		{
 			HttpContext.Session.Remove("Cart");
 			return RedirectToAction("Index");
 		}
 
-		// Hàm xử lý hiển thị quantity lên biểu tượng cart phần Home Index
+		// HÀM XỬ LÝ HIỂN THỊ QUANTITY LÊN BIỂU TƯỢNG CART PHẦN HOME INDEX
 		public async Task<IActionResult> GetCartCount()
 		{
 			// Get cart items from session
@@ -181,6 +182,7 @@ namespace E_Smart.Areas.Client.Controllers
 			return View();
 		}
 
+		//PHƯƠNG THỨC XỬ LÝ LƯU ĐƠN HÀNG 
 		private void SaveOrder(Order order, List<CartItem> cart)
 		{
 			// Lưu thông tin đơn hàng vào bảng Orders
@@ -232,6 +234,18 @@ namespace E_Smart.Areas.Client.Controllers
 				// Chuẩn bị thông tin chung cho việc thanh toán
 				PrepareCheckout(form);
 
+				//Kiểm tra số lượng  tồn kho trước 
+				foreach (var item in cart)
+				{
+					var product = await _productRepository.GetProduct(item.Product_Id);
+					if (product == null || product.Product_quantity < item.Quantity)
+					{
+						// Thông báo nếu số lượng mua vượt quá số lượng tồn kho
+						TempData["Message"] = $"The quantity for {item.Name} exceeds the available stock.";
+						return RedirectToAction("Index");
+					}
+				}
+
 				// Tạo đối tượng Order và lưu vào bảng Orders
 				Order order = new Order
 				{
@@ -243,6 +257,20 @@ namespace E_Smart.Areas.Client.Controllers
 
 				// Lưu đơn hàng và chi tiết đơn hàng vào cơ sở dữ liệu
 				SaveOrder(order, cart);
+
+				// Trừ số lượng tồn kho cho từng sản phẩm trong giỏ hàng
+				foreach (var item in cart)
+				{
+					var product = await _productRepository.GetProduct(item.Product_Id);
+					if (product != null)
+					{
+						product.Product_quantity -= item.Quantity;
+						_dbContext.Products.Update(product);
+					}
+				}
+
+				await _dbContext.SaveChangesAsync();
+
 				HttpContext.Session.SetJson("Cart", new List<CartItem>());
 
 				// Gửi email xác nhận đơn hàng
@@ -309,11 +337,11 @@ namespace E_Smart.Areas.Client.Controllers
 			}
 		}
 
-		// Xử lý khi thanh toán thành công qua VnPay và callback về hệ thống
-		public IActionResult PaymentCallBack()
+		// XỬ LÝ THANH TOÁN THÀNH CÔNG QUA VnPay VÀ CALLBACK VỀ HỆ THỐNG
+		public async Task<IActionResult> PaymentCallBack()
 		{
 			var response = _vnPayService.PaymentExecute(Request.Query);
-			if (response == null || response.VnPayResponseCode != "00")
+			if (response == null || response.VnPayResponseCode != "00")   // 00 => mã thành công khi thanh toán 
 			{
 				TempData["Message"] = $"Checkout VnPay error! {response.VnPayResponseCode}";
 				return RedirectToAction("PaymentFail");
@@ -338,8 +366,20 @@ namespace E_Smart.Areas.Client.Controllers
 				return RedirectToAction("PaymentFail");
 			}
 
-			// Tạo đối tượng Order và lưu vào bảng Orders
-			Order order = new Order
+            //Kiểm tra số lượng  tồn kho trước 
+            foreach (var item in cart)
+            {
+				var product = await _productRepository.GetProduct(item.Product_Id);
+                if (product == null || product.Product_quantity < item.Quantity)
+                {
+					// Thông báo nếu số lượng mua vượt quá số lượng tồn kho
+					TempData["Message"] = $"The quantity for {item.Name} exceeds the available stock.";
+					return RedirectToAction("Index");
+				}
+            }
+
+            // Tạo đối tượng Order và lưu vào bảng Orders
+            Order order = new Order
 			{
 				Order_date = DateTime.Now,
 				CustomerCode = customerCode.Value,
@@ -350,14 +390,23 @@ namespace E_Smart.Areas.Client.Controllers
 			// Lưu đơn hàng và chi tiết đơn hàng vào cơ sở dữ liệu
 			SaveOrder(order, cart);
 
-			// Xóa giỏ hàng sau khi thanh toán thành công
-			HttpContext.Session.SetJson("Cart", new List<CartItem>());
+            // Trừ số lượng tồn kho cho từng sản phẩm trong giỏ hàng
+            foreach (var item in cart)
+            {
+				var product = await _productRepository.GetProduct(item.Product_Id);
+                if (product != null)
+                {
+					product.Product_quantity -= item.Quantity;
+					_dbContext.Products.Update(product);
+                }
+            }
+			await _dbContext.SaveChangesAsync();
 
-			TempData["Message"] = "Checkout VnPay successfully";
+            // Xóa giỏ hàng sau khi thanh toán thành công
+            HttpContext.Session.SetJson("Cart", new List<CartItem>());
+
 			return RedirectToAction("ShoppingSuccess");
 		}
-
-
 	}
 }
 

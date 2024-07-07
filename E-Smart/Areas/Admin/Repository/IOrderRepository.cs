@@ -9,5 +9,6 @@ namespace E_Smart.Areas.Admin.Repository
 		Task DeleteOrder(int id);
 		Task UpdateOrderStatus(int id, string status);
 		Task<IEnumerable<OrderDetail>> GetOrderDetails(int orderID);   // This method is get all OrderDetail by OrderID
+		
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using E_Smart.Areas.Admin.Models;
 using E_Smart.Areas.Admin.Repository;
 using E_Smart.Data;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace E_Smart.Areas.Admin.Service
@@ -46,11 +47,11 @@ namespace E_Smart.Areas.Admin.Service
 
 		public async Task UpdateOrderStatus(int id, string status)
 		{
-			var orderID = await _dbContext.Orders.FindAsync(id);
-			if (orderID != null)
+			var order = await _dbContext.Orders.FindAsync(id);
+            if (order != null)
 			{
-				orderID.Status = status;
-				_dbContext.Orders.Update(orderID);
+				order.Status = status;
+				_dbContext.Orders.Update(order);
 				await _dbContext.SaveChangesAsync();
 			}
 		}

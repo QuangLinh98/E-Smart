@@ -76,6 +76,27 @@ namespace E_Smart.Areas.Admin.Controllers
 			}
 		}
 
+		public async Task<IActionResult> Delivered(int id)
+		{
+			try
+			{
+				var existingOrder = await _orderRepository.GetOneOrder(id);
+				if (existingOrder != null && existingOrder.Status == "Delivering")
+				{
+					await _orderRepository.UpdateOrderStatus(id, "Paid-COD");
+					return RedirectToAction("Index");
+				}
+				return View();
+			}
+			catch (Exception ex)
+			{
+				ModelState.AddModelError("", ex.Message);
+				return View();
+			}
+		}
+
+
+
 
 		public async Task<IActionResult>ShowViewOrderDetail(int id)
 		{

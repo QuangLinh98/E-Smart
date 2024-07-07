@@ -30,7 +30,7 @@ namespace E_Smart.Areas.Admin.Service
 
         public async Task<IEnumerable<Product>> GetAllProduct()
         {
-            var products = await _dbContext.Products.Include(p=>p.Category).ToListAsync();
+            var products = await _dbContext.Products.Include(p=>p.Category).OrderByDescending(p => p.ProductId).ToListAsync();
             return products;
         }
 

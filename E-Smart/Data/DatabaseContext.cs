@@ -1,4 +1,5 @@
 ﻿using E_Smart.Areas.Admin.Models;
+using E_Smart.Areas.Client.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace E_Smart.Data
@@ -32,6 +33,7 @@ namespace E_Smart.Data
 		public DbSet<Customer> Customers { get; set; }
 		public DbSet<Order> Orders { get; set; }
 		public DbSet<OrderDetail> OrderDetails { get; set; }
+		public DbSet<User> Users { get; set; }
 
 
 	}

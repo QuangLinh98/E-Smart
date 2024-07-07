@@ -1,5 +1,7 @@
 using E_Smart.Areas.Admin.Repository;
 using E_Smart.Areas.Admin.Service;
+using E_Smart.Areas.Client.Repository;
+using E_Smart.Areas.Client.Service;
 using E_Smart.Data;
 using E_Smart.Mail;
 using E_Smart.Service;
@@ -23,6 +25,7 @@ builder.Services.AddScoped<IProductRepository,ProductService>();
 builder.Services.AddScoped<ICustomerRepository,CustomerService>();
 builder.Services.AddScoped<IOrderRepository,OrderService>();
 builder.Services.AddScoped<IOrderDetailRepository,OrderDetailService>();
+builder.Services.AddScoped<IUserRepository,UserService>();
 
 //Đăng ký Service Email
 builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("EmailSetting"));
@@ -41,9 +44,6 @@ builder.Services.AddSession(options =>
 	options.IdleTimeout = TimeSpan.FromMinutes(30);
 	options.Cookie.IsEssential = true;
 });
-
-/*//Cấu hình Thanh toán Stripe
-builder.Services.Configure<StripeSetting>(builder.Configuration.GetSection("Stripe"));   //Stripe bên phần appSetting*/
 
 
 

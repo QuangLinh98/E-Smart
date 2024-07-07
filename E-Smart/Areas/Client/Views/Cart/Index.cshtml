@@ -6,6 +6,14 @@
 	<div class="container h-100 d-flex justify-content-between">
 		<div class="col-md-9">
 			<h2 class="text-center text-white">Shopping Cart</h2>
+			@if (!string.IsNullOrEmpty(ViewBag.Message))
+			{
+				<div class="alert alert-danger">
+					<strong>
+						Failed!
+					</strong>@ViewBag.Message
+				</div>
+			}
 			<div class="  ">
 
 				<div class="card mb-4">
@@ -27,8 +35,6 @@
 											}
 										}
 
-										@* 	<img src="~/Upload//product_images/@item.Image"
-								class="img-fluid" alt="Generic placeholder image"> *@
 									</div>
 									<div class="col-md-2 d-flex justify-content-center">
 										<div>
@@ -131,13 +137,13 @@
 					<label class="form-label" for="Address delivery">Address delivery</label>
 					<input type="text" name="Address_Delivery" class="form-control" required />
 				</div>
-				<div class="mt-2" >
-					<a asp-area="Admin" asp-controller="Customer" asp-action="CustomerRegister" class="btn btn-primary">Register</a>
-					<input type="submit" name="payment" asp-area="Client" asp-controller="Cart" asp-action="CheckoutCOD" class="btn btn-primary" value="Checkout COD" />
+				<div class=" mt-2 d-flex justify-content-between align-items-center">
+					<a asp-area="Admin" asp-controller="Customer" asp-action="CustomerRegister" class="btn btn-primary col-5" >Register</a>
+					<input type="submit" name="payment" asp-area="Client" asp-controller="Cart" asp-action="CheckoutCOD" class="btn btn-primary col-6" value="Checkout COD" />
 				</div>
 
 				<div class="mt-2">
-					<input type="submit" name="payment" asp-area="Client" asp-controller="Cart" asp-action="CheckoutVnPay" class="btn btn-primary" value="Checkout VnPay" />
+					<input type="submit" name="payment" asp-area="Client" asp-controller="Cart" asp-action="CheckoutVnPay" class="btn btn-warning w-100" value="VN PAY" />
 				</div>
 
 			}
