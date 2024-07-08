@@ -3,9 +3,9 @@ using E_Smart.Areas.Admin.Service;
 using E_Smart.Areas.Client.Repository;
 using E_Smart.Areas.Client.Service;
 using E_Smart.Data;
+using E_Smart.Hubs;
 using E_Smart.Mail;
 using E_Smart.Service;
-using E_Smart.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -45,6 +45,19 @@ builder.Services.AddSession(options =>
 	options.Cookie.IsEssential = true;
 });
 
+//Đăng ký SignalR
+builder.Services.AddSignalR();
+// Cấu hình CORS để sủ dụng SignalR
+builder.Services.AddCors(options =>
+{
+	options.AddDefaultPolicy(builder =>
+	{
+		builder.WithOrigins("https://localhost:7188/") 
+			   .AllowAnyHeader()
+			   .AllowAnyMethod()
+			   .AllowCredentials();
+	});
+});
 
 
 var app = builder.Build();
@@ -60,8 +73,6 @@ if (!app.Environment.IsDevelopment())
 	app.UseHsts();
 }
 
-
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -69,6 +80,7 @@ app.UseStaticFiles();
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();*/
 
 app.UseRouting();
+app.MapHub<OrderHub>("/orderHub");
 
 app.UseAuthorization();
 

@@ -1,0 +1,59 @@
+﻿@model IEnumerable<E_Smart.Areas.Admin.Models.Order>
+
+<div class="row">
+    <h2>Orders Assigned to You</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Current Status</th>
+                <th>Update Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.OrderId</td>
+                    <td id="status-@order.OrderId">@order.Status</td>
+                    <td>
+                        <select id="select-status-@order.OrderId">
+                            <option value="Pending" selected="@(order.Status == "Pending" ? "selected" : null)">Pending</option>
+                            <option value="Approved" selected="@(order.Status == "Approved" ? "selected" : null)">Approved</option>
+                            <option value="ShipOrder" selected="@(order.Status == "ShipOrder" ? "selected" : null)">ShipOrder</option>
+                            <option value="Delivering" selected="@(order.Status == "Delivering" ? "selected" : null)">Delivering</option>
+                            <option value="Paid-COD" selected="@(order.Status == "Paid-COD" ? "selected" : null)">Paid-COD</option>
+                        </select>
+                        <button onclick="updateStatus(@order.OrderId)">Update</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.18/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder().withUrl("/orderHub").build();
+
+    connection.start().then(() => {
+        console.log("SignalR Connected");
+    }).catch(err => console.error(err.toString()));
+
+    function updateStatus(orderId) {
+        const status = document.getElementById(`select-status-${orderId}`).value;
+        fetch('/Admin/Order/ShipperUpdateOrderStatus', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ orderId: orderId, status: status })
+        }).then(response => {
+            if (response.ok) {
+                alert('Status updated successfully');
+            } else {
+                alert('Failed to update status');
+            }
+        });
+    }
+</script>

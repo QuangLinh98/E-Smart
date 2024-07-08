@@ -25,21 +25,21 @@
 					<td>@item.CustomerCode</td>
 					<td>@item.Order_description</td>
 					<td>@item.Order_date</td>
-					<td>@item.Status</td>
+					<td id="status-@item.OrderId">@item.Status</td>
 
 					<td>
 						@if (item.Status == "Pending")
 						{
 							<a class="btn btn-primary" asp-route-id="@item.OrderId" asp-action="Approve">Approve</a>
 						}
-						else if (item.Status == "Approved")
+						@* else if (item.Status == "Approved")
 						{
 							<a class="btn btn-success" asp-route-id="@item.OrderId" asp-action="ShipOrder">ShipOrder</a>
 						}
 						else if (item.Status == "Delivering")
 						{
 							<a class="btn btn-success" asp-route-id="@item.OrderId" asp-action="Delivered">Delivered</a>
-						}
+						} *@
 						<a class="btn btn-danger" asp-route-id="@item.OrderId" asp-action="Delete">
 							<i class="bi bi-trash3"></i>
 						Cancel
@@ -56,3 +56,16 @@
 		</tbody>
 	</table>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.18/signalr.min.js"></script>
+<script>
+	const connection = new signalR.HubConnectionBuilder().withUrl("/orderHub").build();
+
+	connection.on("ReceiveOrderUpdate", (orderId, status) => {
+		document.getElementById(`status-${orderId}`).innerText = status;
+	});
+
+	connection.start().then(() => {
+		console.log("SignalR Connected");
+	}).catch(err => console.error(err.toString()));
+</script>
