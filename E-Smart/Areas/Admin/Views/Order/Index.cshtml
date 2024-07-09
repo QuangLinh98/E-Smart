@@ -8,7 +8,8 @@
 		<thead>
 			<tr>
 				<th class ="text-center">OrderId</th>
-				<th class="text-center">Customer Code</th>
+				<th class ="text-center">Customer Code</th>
+				<th class="text-center">Phone</th>
 				<th class="text-center">Address</th>
 				<th class="text-center">Order Date</th>
 				<th class="text-center">Status</th>
@@ -22,7 +23,8 @@
 			{
 				<tr>
 					<td>@item.OrderId</td>
-					<td>@item.CustomerCode</td>
+					<td>@item.Customer?.Customer_code</td>
+					<td>@item.CustomerPhone</td>
 					<td>@item.Order_description</td>
 					<td>@item.Order_date</td>
 					<td id="status-@item.OrderId">@item.Status</td>

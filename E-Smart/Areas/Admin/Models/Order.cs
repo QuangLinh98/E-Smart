@@ -10,7 +10,8 @@ namespace E_Smart.Areas.Admin.Models
         public int OrderId { get; set; }
         public DateTime Order_date { get; set; }
         public string Order_description { get; set; }
-        public int CustomerCode { get; set; }
+		public string CustomerPhone { get; set; }
+
         public string Status { get; set; } = "Pending";
 
 		// Phương thức cập nhật trạng thái đơn hàng khi admin duyệt đơn
@@ -19,6 +20,7 @@ namespace E_Smart.Areas.Admin.Models
 			Status = "Approved";
 		}
 
+		[ForeignKey("CustomerId")]
 		public Customer? Customer { get; set; }
         public ICollection<OrderDetail>? OrderDetails { get; set; }
 

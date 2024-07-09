@@ -20,7 +20,6 @@
                         <select id="select-status-@order.OrderId">
                             <option value="Pending" selected="@(order.Status == "Pending" ? "selected" : null)">Pending</option>
                             <option value="Approved" selected="@(order.Status == "Approved" ? "selected" : null)">Approved</option>
-                            <option value="ShipOrder" selected="@(order.Status == "ShipOrder" ? "selected" : null)">ShipOrder</option>
                             <option value="Delivering" selected="@(order.Status == "Delivering" ? "selected" : null)">Delivering</option>
                             <option value="Paid-COD" selected="@(order.Status == "Paid-COD" ? "selected" : null)">Paid-COD</option>
                         </select>

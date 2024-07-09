@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace E_Smart.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20240707070936_DeleteFieldNameInUserTB")]
-    partial class DeleteFieldNameInUserTB
+    [Migration("20240709135246_First")]
+    partial class First
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,12 +55,13 @@ namespace E_Smart.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int>("Customer_code")
-                        .HasColumnType("int");
+                    b.Property<string>("Customer_code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Customer_email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Customer_name")
                         .IsRequired()
@@ -69,9 +70,15 @@ namespace E_Smart.Migrations
 
                     b.Property<string>("Customer_phone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("CustomerId");
+
+                    b.HasIndex("Customer_email")
+                        .IsUnique();
+
+                    b.HasIndex("Customer_phone")
+                        .IsUnique();
 
                     b.ToTable("Customers");
                 });
@@ -84,10 +91,11 @@ namespace E_Smart.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
 
-                    b.Property<int>("CustomerCode")
-                        .HasColumnType("int");
+                    b.Property<string>("CustomerPhone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CustomerId")
+                    b.Property<int>("Customer_Id")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Order_date")
@@ -103,7 +111,7 @@ namespace E_Smart.Migrations
 
                     b.HasKey("OrderId");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("Customer_Id");
 
                     b.ToTable("Orders");
                 });
@@ -218,7 +226,9 @@ namespace E_Smart.Migrations
                 {
                     b.HasOne("E_Smart.Areas.Admin.Models.Customer", "Customer")
                         .WithMany("Orders")
-                        .HasForeignKey("CustomerId");
+                        .HasForeignKey("Customer_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Customer");
                 });

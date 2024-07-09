@@ -1,19 +1,14 @@
-﻿
-using E_Smart.Areas.Admin.Models;
+﻿using E_Smart.Areas.Admin.Models;
 using E_Smart.Areas.Admin.Repository;
 using E_Smart.Areas.Client.Models;
 using E_Smart.Areas.Client.Models.ViewModels;
 using E_Smart.Data;
 using E_Smart.Utilities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis;
-using System.Net;
-using System.Net.Mail;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Microsoft.EntityFrameworkCore;
 using E_Smart.Service;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace E_Smart.Areas.Client.Controllers
 {
@@ -83,7 +78,7 @@ namespace E_Smart.Areas.Client.Controllers
 			List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart");
 			CartItem cartItem = cart.Where(c => c.Product_Id == id).FirstOrDefault();
 
-			// Nếu item > 1 thì ta sẽ giảm số lượng xuống
+			// Nếu item > 1 thì ta sẽ tăng số lượng xuống
 			if (cartItem.Quantity >= 1)
 			{
 				++cartItem.Quantity;
@@ -93,8 +88,20 @@ namespace E_Smart.Areas.Client.Controllers
 				cart.RemoveAll(p => p.Product_Id == id);
 			}
 
-			//Nếu mà cart không tồn tại item nào  
-			if (cart.Count == 0)
+            //Kiểm tra số lượng  tồn kho trước 
+            foreach (var item in cart)
+            {
+                var product = await _productRepository.GetProduct(item.Product_Id);
+                if (product == null || product.Product_quantity < item.Quantity)
+                {
+                    // Thông báo nếu số lượng mua vượt quá số lượng tồn kho
+                    TempData["Message"] = $"The quantity for {item.Name} exceeds the available stock.";
+                    return RedirectToAction("Index");
+                }            
+            }
+
+            //Nếu mà cart không tồn tại item nào  
+            if (cart.Count == 0)
 			{
 				HttpContext.Session.Remove("Cart");
 			}
@@ -105,8 +112,10 @@ namespace E_Smart.Areas.Client.Controllers
 			return RedirectToAction("Index");
 		}
 
-		//HÀM XỬ LÝ GIẢM SỐ LƯỢNG CỦA SẢN PHẨM  (-)
-		public async Task<IActionResult> Decrease(int id)
+ 
+
+        //HÀM XỬ LÝ GIẢM SỐ LƯỢNG CỦA SẢN PHẨM  (-)
+        public async Task<IActionResult> Decrease(int id)
 		{
 			//Lấy tất cả sản phẩm 
 			List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart");
@@ -215,11 +224,11 @@ namespace E_Smart.Areas.Client.Controllers
 		//PHƯƠNG THỨC CHUẨN BỊ THÔNG TIN CHUNG CHO VIỆC THANH TOÁN 
 		private void PrepareCheckout(IFormCollection form)
 		{
-			var customerCode = int.Parse(form["Code_Customer"]);
+			var customerPhone = form["Phone"];
 			var addressDelivery = form["Address_Delivery"];
 
 			// Lưu thông tin khách hàng vào session
-			HttpContext.Session.SetInt32("CustomerCode", customerCode);
+			HttpContext.Session.SetString("CustomerPhone",customerPhone);
 			HttpContext.Session.SetString("AddressDelivery", addressDelivery);
 		}
 
@@ -243,14 +252,16 @@ namespace E_Smart.Areas.Client.Controllers
 						// Thông báo nếu số lượng mua vượt quá số lượng tồn kho
 						TempData["Message"] = $"The quantity for {item.Name} exceeds the available stock.";
 						return RedirectToAction("Index");
-					}
-				}
+                    }
+                }
+                //Cập nhật lại giỏ hàng 
+                HttpContext.Session.SetJson("Cart", cart);
 
-				// Tạo đối tượng Order và lưu vào bảng Orders
-				Order order = new Order
+                // Tạo đối tượng Order và lưu vào bảng Orders
+                Order order = new Order
 				{
 					Order_date = DateTime.Now,
-					CustomerCode = int.Parse(form["Code_Customer"]),
+					CustomerPhone = form["Phone"],
 					Order_description = form["Address_Delivery"],
 					Status = "Pending"
 				};
@@ -274,7 +285,7 @@ namespace E_Smart.Areas.Client.Controllers
 				HttpContext.Session.SetJson("Cart", new List<CartItem>());
 
 				// Gửi email xác nhận đơn hàng
-				var customer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.Customer_code == order.CustomerCode);
+				var customer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.Customer_phone == order.CustomerPhone);
 				if (customer == null)
 				{
 					return Content("Customer not found. Please check the customer code.");
@@ -357,10 +368,10 @@ namespace E_Smart.Areas.Client.Controllers
 			}
 
 			// Lấy thông tin khách hàng từ session
-			var customerCode = HttpContext.Session.GetInt32("CustomerCode");
+			var customerPhone = HttpContext.Session.GetString("CustomerPhone");
 			var addressDelivery = HttpContext.Session.GetString("AddressDelivery");
 
-			if (customerCode == null || addressDelivery == null)
+			if (customerPhone == null || addressDelivery == null)
 			{
 				TempData["Message"] = "Customer information is missing.";
 				return RedirectToAction("PaymentFail");
@@ -382,7 +393,7 @@ namespace E_Smart.Areas.Client.Controllers
             Order order = new Order
 			{
 				Order_date = DateTime.Now,
-				CustomerCode = customerCode.Value,
+				CustomerPhone= customerPhone,
 				Order_description = addressDelivery,
 				Status = "Paid-VnPay"   // Đánh dấu đơn hàng đã thanh toán khi callback từ VnPay thành công
 			};

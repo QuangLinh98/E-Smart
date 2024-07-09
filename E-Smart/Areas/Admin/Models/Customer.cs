@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace E_Smart.Areas.Admin.Models
 {
@@ -14,7 +15,7 @@ namespace E_Smart.Areas.Admin.Models
         public string Customer_name { get; set; }
 
         [Required]
-        public int Customer_code { get; set; }
+        public string Customer_code { get; set; }
 
         [Required]
         [EmailAddress]
@@ -26,8 +27,22 @@ namespace E_Smart.Areas.Admin.Models
 
         [Required]
         [Phone]
+        [RegularExpression(@"^0\d{9,10}$", ErrorMessage = "Phone number must start with 0 and be 10 to 11 digits long.")]
         public string Customer_phone { get; set; }
 
         public ICollection<Order>? Orders { get; set; }
+
+        //Tạo Contructor để thưc hiện Generate Customer_code 
+        public Customer()
+        {
+            Customer_code = GenerateCustomerCode();
+        }
+
+        // Sử dụng biêyr thức điều kiện đê thực hiện Generate
+        private string GenerateCustomerCode()
+        {
+            DateTime now = DateTime.Now;
+            return $"C{now:yyyyMMddHHmmss}";
+        }
     }
 }
