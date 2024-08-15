@@ -30,8 +30,11 @@ namespace E_Smart.Areas.Client.Models
 		[Phone(ErrorMessage = "Invalid Phone Number")]
 		[StringLength(15, ErrorMessage = "Phone number cannot be longer than 15 characters")]
 		public string Phone { get; set; }
-		public bool Status { get; set; }
-		
-		
-	}
+
+        public bool EmailComfirmed { get; set; }
+
+        public string? EmailComfirmationToken { get; set; }
+        public string? ResetPasswordToken { get; set; }
+        public DateTime ResetPasswordTokenExpiration { get; set; }
+    }
 }

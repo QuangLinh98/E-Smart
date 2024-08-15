@@ -9,5 +9,9 @@ namespace E_Smart.Areas.Client.Repository
 		Task AddUser(User user);
 		Task UpdateUser(User user);
 		Task DeleteUser(int id);
+
+		Task<bool> ComfirmEmail(string email, string token);
+		Task<bool> ForgotPassword(string email);
+		Task<bool> ResetPassword(string email, string token,string newPassword);
 	}
 }

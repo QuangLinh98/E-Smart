@@ -1,0 +1,23 @@
+﻿@model E_Smart.Areas.Client.Models.ViewModels.VerifyOtpViewModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center bg-dark">
+                    <h2>Verify OTP</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="VerifyOtp" method="post">
+                        <div class="form-group">
+                            <label for="Otp" class="control-label">OTP</label>
+                            <input id="Otp" name="Otp" class="form-control" />
+                            <span asp-validation-for="Otp" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Verify</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,12 +1,15 @@
 using E_Smart.Areas.Admin.Repository;
 using E_Smart.Areas.Admin.Service;
+using E_Smart.Areas.Client.Models;
 using E_Smart.Areas.Client.Repository;
 using E_Smart.Areas.Client.Service;
 using E_Smart.Data;
 using E_Smart.Hubs;
 using E_Smart.Mail;
 using E_Smart.Service;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +29,15 @@ builder.Services.AddScoped<ICustomerRepository,CustomerService>();
 builder.Services.AddScoped<IOrderRepository,OrderService>();
 builder.Services.AddScoped<IOrderDetailRepository,OrderDetailService>();
 builder.Services.AddScoped<IUserRepository,UserService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+//Đăng ký Redis
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+	options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
+	options.InstanceName = "SampleInstance";
+});
 
 //Đăng ký Service Email
 builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("EmailSetting"));

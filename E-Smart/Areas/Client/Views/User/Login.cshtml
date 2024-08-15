@@ -1,0 +1,70 @@
+﻿﻿
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center bg-dark">
+                    <h2>Login</h2>
+                </div>
+                <div class="card-body ">
+                    @*Show temptData Error*@
+                    @{
+                        var errorMessage = TempData["ErrorMessage"] as string;
+                    }
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @errorMessage
+                        </div>
+                    }
+                    @*Show temptData Success*@
+                    @{
+                        var successMessage = TempData["SuccessMessage"] as string;
+                    }
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success" role="alert">
+                            @successMessage
+                        </div>
+                    }
+
+                    @*Show temptData Success*@
+                    @{
+                        var infoMessage = TempData["InfoMessage"] as string;
+                    }
+
+                    @if (!string.IsNullOrEmpty(infoMessage))
+                    {
+                        <div class="alert alert-success" role="alert">
+                            @infoMessage
+                        </div>
+                    }
+                    <form asp-action="Login" method="post">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" name="email" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" name="password" class="form-control" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block bg-dark mt-4">Login</button>
+                        <div class="my-2 d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <label class="form-check-label text-muted">
+                                    <input type="checkbox" class="form-check-input"> Keep me signed in
+                                </label>
+                            </div>
+                            <a asp-action="ForgotPassword" asp-controller="User" asp-area="Client" class="auth-link text-black">Forgot password?</a>
+                        </div>
+                        <div class="text-center mt-4 font-weight-light">
+                            Don't have an account? <a asp-controller="User" asp-action="Register">Register</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

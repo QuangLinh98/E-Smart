@@ -36,5 +36,6 @@ namespace E_Smart.Service
 			};
 			await smtp.SendMailAsync(message);
 		}
-	}
+
+    }
 }
